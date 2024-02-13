@@ -1,13 +1,15 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import { Colors } from '../constants/colors';
-import { Text } from 'react-native';
-import Home from '../screen/main/dashboard/Home';
-import Search from '../screen/main/search/Search';
-import ListHome from '../screen/main/list/ListHome';
-import AccountOptions from '../screen/main/account/AccountOptions';
+import { Image, Text, View } from 'react-native';
+import Home from '../screen/tabs/dashboard/Home';
+import Search from '../screen/tabs/search/Search';
+import normalize from '../utils/helpers/normalize';
+import { Icons } from '../constants/icons';
+import Archeive from '../screen/tabs/archieve/Archieve';
+import ListHome from '../screen/tabs/dashboard/ListHome';
+import PlayTab from '../component/PlayTab';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -20,36 +22,52 @@ const fadeAnimation = ({ current }) => ({
 const fadeAnimation2 = ({ focused, state, routes }) => ({
   tabBarStyle: {
     opacity: (focused|| state|| routes) ? 1 : 0.5,
+    
   },
 });
 
+
+
 const TabNavigation = () => {
-  const Tabs = [HomeScreen, SearchScreen, ListScreen, AccountScreen];
-  const Title = ['Home', 'Search', 'Anime List', 'My Profile'];
+  const Tabs = [HomeScreen, SearchScreen, ArchieveScreen];
+  const Title = ['Home', 'Search', 'Achieve'];
   const Icon = [
-    'home',
-    'search',
-    'archive',
-    'user-alt'
+    {
+      default:Icons.home,
+      active:Icons.homeActive,
+    },
+    {
+      default:Icons.search,
+      active:Icons.searchActive,
+    },
+    {
+      default:Icons.box,
+      active:Icons.boxActive,
+    },
+    {
+      default:Icons.user,
+      active:Icons.userActive,
+    },
   ];
   return (
+    <View style={{ flex: 1 }}>
+    <PlayTab/>
     <Tab.Navigator
     screenOptions={{
       headerShown: false,
       tabBarHideOnKeyboard: true,
       tabBarStyle: {
-        backgroundColor: Colors.maroon,
+        backgroundColor: 'black',
         position: 'absolute',
         paddingTop: 3,
         height: 53,
         width: '100%',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
         borderTopWidth:0
       },
       tabBarStyleInterpolator: fadeAnimation2,
+      
     }}
 >
   {Tabs.map((item, index) => {
@@ -60,17 +78,17 @@ const TabNavigation = () => {
             component={item}
             options={{
               tabBarIcon: ({focused, size}) => (
-                <FontAwesome5
-                name={Icon[index]}
-                size={size}
-                color={focused?Colors.red:Colors.grey}/>
+                <Image
+                source={focused?Icon[index].active:Icon[index].default}
+                style={{width:size, height: size}}/>
               ),
               tabBarLabel: ({focused})=>(
                 <Text 
                 style={{
                   color: focused?Colors.red:Colors.grey,
                   fontWeight: '900',
-                  fontSize: 12,
+                  fontSize: normalize(8),
+                  marginBottom: 2,
                   textTransform: 'uppercase'
                 }}>
                   {Title[index]}
@@ -81,6 +99,7 @@ const TabNavigation = () => {
         );
       })}
     </Tab.Navigator>
+    </View>
   );
 }
 
@@ -88,6 +107,7 @@ export default TabNavigation;
 
 const HomeScreenStack = {
   Home: Home,
+  List: ListHome,
 }
 const HomeScreen = () =>{
  return(
@@ -104,29 +124,21 @@ const SearchScreen = () =>{
   )
 }
 
-const ListScreenStack = {
-  ListHome:ListHome
+const ArchieveScreenStack = {
+  Archieve:Archeive
 }
-const ListScreen = () =>{
+const ArchieveScreen = () =>{
   return(
-    <TabStackScreen initialRouteName={'ListHome'} screenStack={ListScreenStack}/>
+    <TabStackScreen initialRouteName={'Archieve'} screenStack={ArchieveScreenStack}/>
   )
 }
 
-const AccountScreenStack = {
-  AccountOptions: AccountOptions
-}
-const AccountScreen = () =>{
-  return(
-    <TabStackScreen initialRouteName={'AccountOptions'} screenStack={AccountScreenStack}/>
-  )
-}
 
 const TabStackScreen = ({initialRouteName, screenStack}) =>{
   return(
     <Stack.Navigator
       screenOptions={{headerShown: false,
-        cardStyle: { backgroundColor: Colors.navy },
+        cardStyle: { backgroundColor: Colors.black },
         cardStyleInterpolator: fadeAnimation,
       }}
       initialRouteName={initialRouteName}>

@@ -36,7 +36,7 @@ export default function StackNavigation() {
             <Stack.Navigator
               screenOptions={{headerShown: false, gestureEnabled: false,
                 ...TransitionPresets.SlideFromRightIOS,
-                cardStyle: { backgroundColor: Colors.navy }
+                cardStyle: { backgroundColor: Colors.black }
               }}>
               {Object.entries({
                 ...Screens,

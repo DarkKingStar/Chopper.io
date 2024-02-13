@@ -5,6 +5,7 @@ import { Images } from '../../constants/image'
 import { Colors } from '../../constants/colors'
 import { TextInput } from 'react-native-gesture-handler'
 import GoBackButton from '../../component/GoBackButton'
+import normalize from '../../utils/helpers/normalize'
 
 const SignUp = ({navigation}) => {
   return (
@@ -12,18 +13,18 @@ const SignUp = ({navigation}) => {
       <GoBackButton navigation={navigation}/>
       <Image
             style={{
-              width:180,
-              height:150,
-              marginTop: 50,
+              width:normalize(150),
+              height:normalize(120),
+              marginTop: normalize(50),
               alignSelf: 'center',
             }}
             source={Images.brandImg}
         />
         <Image
           style={{
-            width:200,
-            height:40,
-            marginBottom: 50,
+            width:normalize(180),
+            height:normalize(35),
+            marginBottom: normalize(10),
             alignSelf: 'center',
           }}
           source={Images.headingImg}
@@ -35,7 +36,6 @@ const SignUp = ({navigation}) => {
           fontSize: 28,
           marginLeft:20,
           marginBottom: 20,
-          fontWeight: '700',
         }}>Sign Up</Text>
         <TextInput style={styles.input} 
         placeholder='Enter Name'
