@@ -1,22 +1,13 @@
-export function CmtoFeet(cm) {
-  return parseInt(Math.round(parseFloat(cm / 30.48)));
-}
-export function CmtoInch(cm) {
-  return parseInt(
-    Math.round(
-      (parseFloat(cm / 30.48) - parseInt(parseFloat(cm / 30.48))) * 12,
-    ),
-  );
-}
-export function KgToLbs(kg) {
-  return parseInt(Math.round(parseFloat(kg * 2.20462))) + 1;
-}
-export function FeettoCm(feetinch) {
-  return parseFloat(feetinch * 30.48).toFixed(1);
-}
-export function LbstoKg(lbs) {
-  return parseFloat(lbs / 2.20462).toFixed(1);
-}
-export function InchfromFeet(decimal, natural) {
-  return parseInt(Math.round(parseFloat(decimal - natural) * 12));
+export function SecondstoTime(totalSeconds){
+  let hours = Math.floor(totalSeconds / 3600);
+  let minutes = Math.floor((totalSeconds % 3600) / 60);
+  let seconds = parseInt(totalSeconds % 60);
+  minutes = minutes<10 ? "0"+minutes : minutes;
+  hours = hours<10 ? "0"+hours : hours;
+  seconds = seconds<10? "0"+seconds : seconds;
+  if(hours!=0){
+    return `${hours}:${minutes}:${seconds}`;
+  }else{
+    return `${minutes}:${seconds}`;
+  }
 }

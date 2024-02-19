@@ -12,5 +12,15 @@ export const Icons = {
     bell:  require('../assest/Icons/bell.png'),
     bellAlert:  require('../assest/Icons/bell-alert.png'),
     list:  require('../assest/Icons/list.png'),
-    gear: require('../assest/Icons/setting.png')
+    gear: require('../assest/Icons/setting.png'),
+    arrowDown: require('../assest/Icons/arrow-down.png'),
+    next: require('../assest/Icons/next.png'),
+    prev: require('../assest/Icons/previous.png'),
+    fastForward: require('../assest/Icons/fast-forward.png'),
+    fastBackward: require('../assest/Icons/fast-backward.png'),
+    fullscreenExit: require('../assest/Icons/fullscreen-exit.png'),
+    fullscreen: require('../assest/Icons/fullscreen.png'),
+    threedots: require('../assest/Icons/dots.png'),
+    arrowBack: require('../assest/Icons/arrowback.png'),
+    download: require('../assest/Icons/download.png'),
 }

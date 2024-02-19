@@ -12,6 +12,7 @@ const HorizontalFlatList = ({
         data={data}
         horizontal
         scrollEnabled={data.length>3}
+        initialNumToRender={data.length>3?4:data.length}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.item}>
@@ -33,10 +34,10 @@ const styles = StyleSheet.create({
   },
   item: {
     backgroundColor: Colors.black,
-    borderWidth: normalize(1),
+    borderWidth: normalize(0.45),
+    borderRadius: normalize(5),
     width: normalize(80),
     borderColor: Colors.white,
-    borderRadius: normalize(5),
     marginHorizontal: normalize(3),
     paddingBottom: normalize(10)
   },

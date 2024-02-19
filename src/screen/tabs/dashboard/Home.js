@@ -1,4 +1,4 @@
-import { Animated, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Animated, FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import normalize from '../../../utils/helpers/normalize'
 import useGreetings from '../../../utils/useGreetings'
@@ -9,30 +9,30 @@ import LinearGradient from 'react-native-linear-gradient'
 import HorizontalFlatList from '../../../component/HorizentalFlatList'
 
 const categories =  [
-  [{
+  {
     name:'Recent Updates',
     route:'/Category/RecentUpdate'
   },
   {
     name:'Most Popular',
     route:'/Category/MostPopular'
-  }],
-  [{
+  },
+  {
     name:'Anime Movies',
     route:'/Category/AnimeMovies'
   },
   {
     name:'Top Airings',
     route:'/Category/TopAirings'
-  }],
-  [{
+  },
+  {
     name:'Recent Releases',
     route:'/Category/RecentReleases'
   },
   {
     name:'More...',
     route:'/Category'
-  }]
+  }
 ]
 const animeList = [
   {
@@ -118,7 +118,7 @@ const Home = ({navigation}) => {
         <View style={{
           width:'100%'
         }}>
-          <ImageBackground source={{uri:animeList[0].poster}}>
+          <ImageBackground source={{uri:suggestions[3].poster}} resizeMode='stretch' style={{flex:1}}>
             <ImageBackground source={Images.overlayer} resizeMode='cover' style={{flex:1}}>
               <Animated.View
                 style={{
@@ -162,8 +162,34 @@ const Home = ({navigation}) => {
               }}
               >{useGreetings()}</Text>
               </Animated.View>
-              <View style={{marginTop:  normalize(10)}}>
-                {categories.map((cate,catindex)=>(
+              
+              <View 
+                style={{flex:1,
+                flexDirection:'row',
+                justifyContent:'space-evenly',               
+                }}>  
+                <FlatList
+                  data= {categories}
+                  horizontal
+                  initialNumToRender={3}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <View style={{marginHorizontal:  normalize(4), paddingTop: normalize(30),paddingBottom: normalize(10)}}>
+                    <LinearGradient
+                    colors={[Colors.red,Colors.red, Colors.yellow]}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                    style={styles.bubble}
+                    >
+                    <TouchableOpacity style={styles.bubble}>
+                    <Text
+                    style={{fontSize:normalize(12),color:Colors.black,fontWeight:'700'}}
+                    >{item.name}</Text>
+                  </TouchableOpacity>
+                  </LinearGradient>
+                  </View>
+                  )}
+                />
+                {/* {categories.map((cate,catindex)=>(
                 <View key={catindex} 
                 style={{flex:1,
                 flexDirection:'row',
@@ -172,20 +198,20 @@ const Home = ({navigation}) => {
                 }}>  
                   {cate.map((item,index)=>(
                     <LinearGradient
-                    colors={[Colors.red,Colors.maroon,Colors.maroon, Colors.red]}
-                    start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }}
+                    colors={[Colors.red,Colors.red, Colors.yellow]}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                     style={styles.bubble}
                     key={index}
                     >
                     <TouchableOpacity style={styles.bubble}>
                     <Text
-                    style={{fontSize:normalize(12),fontWeight:'700'}}
+                    style={{fontSize:normalize(12),color:Colors.black,fontWeight:'700'}}
                     >{item.name}</Text>
                   </TouchableOpacity>
                   </LinearGradient>
                   ))}
                 </View>
-                ))}
+                ))} */}
               </View>
             </ImageBackground>
           </ImageBackground>
@@ -224,9 +250,9 @@ export default Home
 
 const styles = StyleSheet.create({
   bubble:{
-    borderRadius:  normalize(8),
-    width: normalize(120),
-    height: normalize(40),
+    borderRadius:  normalize(25),
+    width: normalize(110),
+    height: normalize(35),
     alignItems:'center',
     justifyContent:'center',
   },

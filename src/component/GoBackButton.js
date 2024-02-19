@@ -1,6 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import { Images } from '../constants/image'
+import { Icons } from '../constants/icons'
 
 const GoBackButton = ({navigation}) => {
   return (
@@ -11,7 +11,7 @@ const GoBackButton = ({navigation}) => {
         width:35,
         height: 35
        }}
-       source={Images.arrowBack}
+       source={Icons.arrowBack}
       />
     </Pressable>
   </View>
