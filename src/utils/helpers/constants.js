@@ -1,8 +1,0 @@
-export default {
-  TOKEN: 'TOKEN',
-  USER_ID: 'USER_ID',
-  REFRESH_TOKEN: 'REFRESH_TOKEN',
-  IMAGE_URL: '',
-  BASE_URL: "",
-  STARTING: "STARTING",
-};

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     borderWidth: normalize(0.45),
     borderRadius: normalize(5),
     width: normalize(80),
-    borderColor: Colors.white,
+    borderColor: Colors.darkGrey,
     marginHorizontal: normalize(3),
     paddingBottom: normalize(10)
   },
@@ -48,14 +48,14 @@ const styles = StyleSheet.create({
   },
   itemname:{
     textAlign:'center',
-    fontSize: normalize(9),
+    fontSize: normalize(11),
     fontWeight: '700',
     marginTop: normalize(3),
     color:Colors.white,
     paddingHorizontal: normalize(10)
   },
   itemSE:{
-    fontSize: normalize(8),
+    fontSize: normalize(10),
     textAlign:'center',
     fontWeight: '900',
     color: Colors.yellow

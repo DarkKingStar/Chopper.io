@@ -1,13 +1,37 @@
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 import Button from '../../component/Button'
-import React from 'react'
+import React, { useState } from 'react'
 import { Images } from '../../constants/image'
 import { Colors } from '../../constants/colors'
 import { TextInput } from 'react-native-gesture-handler'
 import normalize from '../../utils/helpers/normalize'
 import Separator from '../../component/Separator'
+import { useDispatch } from 'react-redux'
+import { guestLoginRequest, loginRequest, setUserToken } from '../../redux/reducer/AuthReducer'
 
 const Login = ({navigation}) => {
+  const dispatch = useDispatch();
+  const [email,setEmail] =  useState('');
+  const [password,setPassword] =  useState('');
+
+
+  const handleLoginasUser = () =>{
+    dispatch(
+      loginRequest({email: email , password: password}),
+    )
+      
+  }
+  const handleLoginasGuest = () =>{
+    dispatch(
+      guestLoginRequest({
+        token:'guest',
+        user_id:'guest',
+        refresh_token:'guest'
+      }
+      )
+    )
+  }
+
   return (
     <View style={{ flex:1}}>
       <Image
@@ -40,16 +64,20 @@ const Login = ({navigation}) => {
         <TextInput style={styles.input} 
         placeholder='Enter Email'
         placeholderTextColor= {Colors.grey}
+        value={email}
+        onChange={(e)=>setEmail(e.nativeEvent.text)}
         />
         <TextInput style={styles.input}
         placeholder='Enter Password'
         placeholderTextColor={Colors.grey}
+        value={password}
+        onChange={(e)=>setPassword(e.nativeEvent.text)}
         />
         <Button
         title='Login'
         buttonStyle={styles.LoginbtnStyle}
         textStyle={styles.btntextStyle}
-        onClick={()=>navigation.navigate('TabNavigation')}/>
+        onClick={()=>handleLoginasUser()}/>
         <Button
         title='Forgot Password?'
         textStyle={styles.btntextStyle}
@@ -66,7 +94,7 @@ const Login = ({navigation}) => {
       title='Login as a guest'
       buttonStyle={styles.GuestbtnStyle}
       textStyle={styles.btntextStyle}
-      onClick={()=>navigation.navigate('TabNavigation')}/>
+      onClick={()=>handleLoginasGuest()}/>
       </View>
       </View>
     </View>

@@ -10,6 +10,8 @@ import { Icons } from '../constants/icons';
 import Archeive from '../screen/tabs/archieve/Archieve';
 import ListHome from '../screen/tabs/dashboard/ListHome';
 import PlayTab from '../component/PlayTab';
+import Account from '../screen/tabs/dashboard/Account';
+import Settings from '../screen/tabs/dashboard/Settings';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -108,6 +110,8 @@ export default TabNavigation;
 const HomeScreenStack = {
   Home: Home,
   List: ListHome,
+  Profile: Account,
+  Settings: Settings,
 }
 const HomeScreen = () =>{
  return(

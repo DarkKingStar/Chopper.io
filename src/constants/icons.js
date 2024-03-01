@@ -23,4 +23,10 @@ export const Icons = {
     threedots: require('../assest/Icons/dots.png'),
     arrowBack: require('../assest/Icons/arrowback.png'),
     download: require('../assest/Icons/download.png'),
+    insurance: require('../assest/Icons/insurance.png'),
+    info: require('../assest/Icons/info.png'),
+    support: require('../assest/Icons/support.png'),
+    rating: require('../assest/Icons/rating.png'),
+    envlope: require('../assest/Icons/mail.png'),
+    logout: require('../assest/Icons/logout.png'),
 }

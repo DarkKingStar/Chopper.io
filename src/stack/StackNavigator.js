@@ -5,10 +5,13 @@ import TabNavigation from './TabNavigation';
 import OnBoarding from '../screen/OnBoarding';
 import ForgotPassword from '../screen/auth/ForgotPassword';
 import { Colors } from '../constants/colors';
+import { useSelector } from 'react-redux';
+import Splash from '../screen/Splash';
 
 const Stack = createStackNavigator();
 
 export default function StackNavigation() {
+    const AuthReducer = useSelector(state => state.AuthReducer)
     const OnBoard = {
         OnBoarding: OnBoarding,
     };
@@ -22,21 +25,21 @@ export default function StackNavigation() {
         TabNavigation: TabNavigation,
       };
 
-      const Screens = {...OnBoard,...Auth,...Main}
-    //   const Screens =
-    //     AuthReducer?.isStart == null
-    //       ? OnBoard
-    //       : (AuthReducer?.token == null 
-    //       ? Auth
-    //       : Main);
-    //   if (AuthReducer.isLoading) {
-    //     return <Splash />;
-    //   } else {
+      // const Screens = {...OnBoard,...Auth,...Main}
+      const Screens =
+        AuthReducer?.isStart == null
+          ? OnBoard
+          : (AuthReducer?.token == null 
+          ? Auth
+          : Main);
+      if (AuthReducer.isLoading) {
+        return <Splash />;
+      } else {
         return (
             <Stack.Navigator
               screenOptions={{headerShown: false, gestureEnabled: false,
                 ...TransitionPresets.SlideFromRightIOS,
-                cardStyle: { backgroundColor: Colors.black }
+                cardStyle: { backgroundColor: Colors.black, color: Colors.white }
               }}>
               {Object.entries({
                 ...Screens,
@@ -47,6 +50,6 @@ export default function StackNavigation() {
               })}
             </Stack.Navigator>
         );
-    //   }
+      }
     };
   

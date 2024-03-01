@@ -1,13 +1,40 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import Button from '../../component/Button'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Images } from '../../constants/image'
 import { Colors } from '../../constants/colors'
 import { TextInput } from 'react-native-gesture-handler'
 import GoBackButton from '../../component/GoBackButton'
 import normalize from '../../utils/helpers/normalize'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginRequest, signupRequest } from '../../redux/reducer/AuthReducer'
 
 const SignUp = ({navigation}) => {
+  const dispatch = useDispatch();
+  const AuthReducer = useSelector(state => state.AuthReducer);
+  const[name, setName] = useState('');
+  const[email, setEmail] = useState('');
+  const[password, setPassword] = useState('');
+  useEffect(() => {
+    if(AuthReducer?.status === 'Auth/signupSuccess'){
+      handleLogin();
+    }
+  },[AuthReducer?.status])
+
+  const handleLogin = () =>{
+    dispatch(loginRequest({
+      email: email,
+      password: password,
+    }))
+  }
+  const handleSignUp = () =>{
+    console.log("sign up cred data=========>", email, password, name);
+    dispatch(signupRequest({
+      name: name,
+      email: email,
+      password: password,
+    }));
+  }
   return (
     <View style={{flex:1}}>
       <GoBackButton navigation={navigation}/>
@@ -39,21 +66,27 @@ const SignUp = ({navigation}) => {
         }}>Sign Up</Text>
         <TextInput style={styles.input} 
         placeholder='Enter Name'
+        value={name}
+        onChange={(e) => setName(e.nativeEvent.text)}
         placeholderTextColor= {Colors.grey}
         />
         <TextInput style={styles.input} 
         placeholder='Enter Email'
+        value={email}
+        onChange={(e)=>setEmail(e.nativeEvent.text)}
         placeholderTextColor= {Colors.grey}
         />
         <TextInput style={styles.input}
         placeholder='Enter Password'
+        value={password}
+        onChange={(e)=>setPassword(e.nativeEvent.text)}
         placeholderTextColor={Colors.grey}
         />
         <Button
         title='Sign In'
         buttonStyle={styles.SignUpbtnStyle}
         textStyle={styles.btntextStyle}
-        onClick={()=>navigation.navigate('TabNavigation')}/>
+        onClick={()=>handleSignUp()}/>
       </View>
       </View>
     </View>

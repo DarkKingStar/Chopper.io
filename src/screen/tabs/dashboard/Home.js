@@ -1,4 +1,4 @@
-import { Animated, FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Animated, FlatList, Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import normalize from '../../../utils/helpers/normalize'
 import useGreetings from '../../../utils/useGreetings'
@@ -106,20 +106,22 @@ const Home = ({navigation}) => {
   });
 
   return (
-    <View style={{flex:1,marginBottom:126}}>
-      <Animated.ScrollView 
+    <SafeAreaView style={styles.container}>
+      <Animated.ScrollView
       scrollEventThrottle={0}
       onScroll={Animated.event(
         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
         { useNativeDriver: true }
       )}
       showsVerticalScrollIndicator={false}
+      bounces={true}
       >
         <View style={{
           width:'100%'
         }}>
-          <ImageBackground source={{uri:suggestions[3].poster}} resizeMode='stretch' style={{flex:1}}>
-            <ImageBackground source={Images.overlayer} resizeMode='cover' style={{flex:1}}>
+          <ImageBackground source={{uri:animeList[0].poster}} resizeMode='stretch' style={{flex:1,margin:0}}>
+            <ImageBackground source={Images.overlayer} resizeMode='cover' style={{flex:1,margin:0, paddingHorizontal:normalize(3)}}>
+              {/* settings button */}
               <Animated.View
                 style={{
                   flexDirection: 'row',
@@ -134,10 +136,11 @@ const Home = ({navigation}) => {
                   })}]
                 }}
               >
-                <TouchableOpacity onPress={()=>{}}>
+                <TouchableOpacity onPress={()=>navigation.navigate("Settings")}>
                   <Image source={Icons.gear} style={{width:normalize(25),height:normalize(25)}}/>
                 </TouchableOpacity>
               </Animated.View>
+              {/* profile image and greetings */}
               <Animated.View
                 style={{
                   flexDirection: 'row',
@@ -151,9 +154,10 @@ const Home = ({navigation}) => {
                   })}]
                 }}
               >
+              <TouchableOpacity onPress={()=>navigation.navigate("Profile")}>
               <Image source={{uri: "https://img.freepik.com/premium-photo/anime-male-avatar_950633-956.jpg?ga=GA1.1.1733710313.1706420280&"}}
                 style={{width:normalize(30),height:normalize(30),borderRadius:100}}
-              />
+              /></TouchableOpacity>
               <Text
               style={{
                 fontSize: normalize(18),
@@ -182,7 +186,7 @@ const Home = ({navigation}) => {
                     >
                     <TouchableOpacity style={styles.bubble}>
                     <Text
-                    style={{fontSize:normalize(12),color:Colors.black,fontWeight:'700'}}
+                    style={{fontSize:normalize(12),color:Colors.white,fontWeight:'700'}}
                     >{item.name}</Text>
                   </TouchableOpacity>
                   </LinearGradient>
@@ -242,13 +246,17 @@ const Home = ({navigation}) => {
           <HorizontalFlatList data={actionanime}/>
         </View>
       </Animated.ScrollView>
-    </View>
+    </SafeAreaView>
   )
 }
 
 export default Home
 
 const styles = StyleSheet.create({
+  container:{
+    flex:1,
+    marginBottom:126
+  },
   bubble:{
     borderRadius:  normalize(25),
     width: normalize(110),
