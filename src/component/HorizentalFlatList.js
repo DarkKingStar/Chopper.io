@@ -5,6 +5,9 @@ import { Colors } from '../constants/colors';
 import normalize from '../utils/helpers/normalize';
 import { useDispatch, useSelector } from 'react-redux';
 import HorizontalFlatListLoader from './HorizentalFlatListLoader';
+import isInternetConnected from '../utils/helpers/NetInfo';
+import NetInfo from '@react-native-community/netinfo';
+import _ from 'lodash';
 
 const HorizontalFlatList = ({
     data,
@@ -15,6 +18,7 @@ const HorizontalFlatList = ({
   const dispatch = useDispatch();
   const animeReducer =  useSelector(state => state.AnimeReducer);
   const [hasPageNext,setHasPageNext] = useState(false);
+  const [hasFailed,setHasFailed] = useState(false);
   useEffect(()=>{
     console.log("hasNextPage ",value,":===========",animeReducer[value].hasNextPage)
     if(animeReducer[value]?.hasNextPage!==undefined || animeReducer[value]?.hasNextPage !==null)
@@ -23,10 +27,37 @@ const HorizontalFlatList = ({
     }
   },[animeReducer[value]])
 
-  const callFetchFunction = (page) => {
-      setPage(page);
-      dispatch(fetchFunction({page: page}));
+  const callFetchFunction = async(page) => {
+      try{
+        await isInternetConnected();
+        setPage(page);
+        dispatch(fetchFunction({page: page}));
+      }catch(err){
+        console.log('Cant fetch data Please Connect To Internet');
+        setHasFailed(true);
+      }
   }
+
+  const handleConnectivityChange = async isConnected => {
+    if (isConnected && hasPageNext && hasFailed) {
+      // If internet is reconnected and there is a next page, call fetch with page + 1
+      callFetchFunction(page + 1);
+      setHasFailed(false);
+    }
+  };
+
+   // Debounce the handleConnectivityChange function to avoid rapid calls
+   const debouncedHandleConnectivityChange = _.debounce(handleConnectivityChange, 1000);
+
+   useEffect(() => {
+     const unsubscribe = NetInfo.addEventListener(state => {
+       debouncedHandleConnectivityChange(state.isConnected);
+     });
+ 
+     return () => {
+       unsubscribe();
+     };
+   });
 
 
   return (

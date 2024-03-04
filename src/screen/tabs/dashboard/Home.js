@@ -134,6 +134,7 @@ const Home = ({navigation}) => {
       unsubscribe();
     };
   }, [isFocused]);
+
   // useEffect(()=>{
   //   callFetchFunction(1);
   // },[isFocused])
