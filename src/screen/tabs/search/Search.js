@@ -1,23 +1,45 @@
 import { FlatList, StyleSheet, Text,Image, TextInput, ScrollView, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import normalize from '../../../utils/helpers/normalize'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Icons } from '../../../constants/icons'
 import { Colors } from '../../../constants/colors'
+import { useDispatch, useSelector } from 'react-redux'
+import { animeSearchRequest } from '../../../redux/reducer/AnimeReducer'
+
 
 const Search = () => {
+  const dispatch = useDispatch();
+  const animeReducer = useSelector(state => state.AnimeReducer);
+  const [searchQuery,setSearchQuery] = useState("");
+  useEffect(()=>{
+    if(searchQuery.length>3){
+      dispatch(animeSearchRequest({data:searchQuery}))
+    }
+  },[searchQuery])
+
   return (
-    <ScrollView style={{flex:1}}>
+    <View>
       <View style={styles.search}>
       <TextInput 
         placeholder='Type here to Search Anime...'
+        value={searchQuery}
+        onChange={(e)=>setSearchQuery(e.nativeEvent.text)}
         style={styles.searchinput}
       />
       <TouchableOpacity style={styles.searchbtn}>
         <Image source={Icons.search} style={{width:normalize(20),height:normalize(20)}}/>
       </TouchableOpacity>
       </View>
-    </ScrollView>
+      <FlatList
+        data={(searchQuery != "" && animeReducer?.animeSearch?.results) || []}
+        scrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <Text key={item?.id|| item}> {item?.title}</Text>
+        )}
+      />
+    </View>
   )
 }
 
@@ -35,12 +57,11 @@ const styles = StyleSheet.create({
   searchinput:{
     paddingHorizontal: normalize(10),
     paddingVertical: normalize(10),   
-    flex: 1,
+    flex:1,
     fontSize: normalize(14),
     color: Colors.white
   },
   searchbtn:{
-    height: '100%',
     justifyContent: 'center',
     paddingHorizontal: normalize(15)
   }

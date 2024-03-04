@@ -1,5 +1,5 @@
 import { Animated, FlatList, Image, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import normalize from '../../../utils/helpers/normalize'
 import useGreetings from '../../../utils/useGreetings'
 import { Icons } from '../../../constants/icons'
@@ -7,31 +7,64 @@ import { Images } from '../../../constants/image'
 import { Colors } from '../../../constants/colors'
 import LinearGradient from 'react-native-linear-gradient'
 import HorizontalFlatList from '../../../component/HorizentalFlatList'
+import HorizontalFlatListLoader from '../../../component/HorizentalFlatListLoader'
+import isInternetConnected from '../../../utils/helpers/NetInfo';
+import NetInfo from '@react-native-community/netinfo'
+import _ from 'lodash';
+import {useIsFocused} from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux'
+import { animeMoviesRequest, popularAnimeRequest, recentReleasedRequest, newSeasonRequest } from '../../../redux/reducer/AnimeReducer'
 
-const categories =  [
+const genrelist =  [
   {
-    name:'Recent Updates',
-    route:'/Category/RecentUpdate'
+    name:"Action",
+    route:'GenreContent',
+    genreId:"action",
   },
   {
-    name:'Most Popular',
-    route:'/Category/MostPopular'
+    name:	"Comedy",
+    route:'GenreContent',
+    genreId:"comedy",
   },
   {
-    name:'Anime Movies',
-    route:'/Category/AnimeMovies'
+    name:"Isekai",
+    route:'GenreContent',
+    genreId:"isekai",
   },
   {
-    name:'Top Airings',
-    route:'/Category/TopAirings'
+    name:"School",
+    route:'GenreContent',
+    genreId:"school",
   },
   {
-    name:'Recent Releases',
-    route:'/Category/RecentReleases'
+    name:"Shounen",
+    route:'GenreContent',
+    genreId:"shounen",
+  },
+  {
+    name:"Slice of Life",
+    route:'GenreContent',
+    genreId:"slice-of-life",
+  },
+  {
+    name:	"Sports",
+    route:'GenreContent',
+    genreId:"sports",
+  },
+  {
+    name:	"Thriller",
+    route:'GenreContent',
+    genreId:"thriller",
+  },
+  {
+    name:	"Workplace",
+    route:'GenreContent',
+    genreId:"workplace",
   },
   {
     name:'More...',
-    route:'/Category'
+    route:'GenreList',
+    genreId: false
   }
 ]
 const animeList = [
@@ -61,50 +94,118 @@ const animeList = [
   },
   
 ]
-const  suggestions =  [
-  {
-    poster:"https://i.pinimg.com/564x/81/c7/9c/81c79cb8cfcb320fb7890403fc9bc81d.jpg",
-    name:'Kimetsu no Yaiba-Demon Slayer',
-    season: '03'
-  },
-  {
-    poster:"https://i.pinimg.com/564x/67/b6/90/67b690140f09b858dd942c7a35e434e2.jpg",
-    name: 'Attack on Titan',
-    season: '04'
-  },
-  {
-    poster:"https://i.pinimg.com/564x/6b/77/e3/6b77e36e39f79036d6645810ed3a7fe2.jpg",
-    name: 'One Punch Man',
-    season: '02'
-  },
-  {
-    poster:"https://i.pinimg.com/564x/b9/ef/0a/b9ef0ae3b860fd287e907491fddd560c.jpg",
-    name: 'Hunter x Hunter',
-    season: '06'
-  },
-  {
-    poster:"https://i.pinimg.com/564x/0b/25/6b/0b256b6bf21a2607b9d3950b5b1a764f.jpg",
-    name: 'Jujutsu Kaisen',
-    season: '02'
-  },
-  {
-    poster:"https://i.pinimg.com/564x/26/4e/c9/264ec9d43fb4c2c4fbc0a976b42cb05a.jpg",
-    name: 'Fullmetal Alchemist: Brotherhood',
-    season: '02'
-  },
-]
-const actionanime = [...suggestions].reverse()
+
 
 const Home = ({navigation}) => {
-
+  const [recentReleasedLoading, setRecentReleasedLoading] = useState(true);
+  const [newSeasonLoading, setNewSeasonLoading] = useState(true);
+  const [popularAnimeLoading, setPopularAnimeLoading] = useState(true);
+  const [animeMoviesLoading, setAnimeMoviesLoading] = useState(true);
+  const dispatch = useDispatch();
+  const greetings = useGreetings();
+  const animeReducer = useSelector(state => state.AnimeReducer);
   const [scrollY, setScrollY] = useState(new Animated.Value(0));
-
+  const isFocused = useIsFocused();
   const animatedOpacity = scrollY.interpolate({
     inputRange: [0, 50], // adjust these values as per your need
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
+  
+  const handleConnectivityChange = async isConnected => {
+    if (isFocused && animeReducer.status === '') {
+      if (isConnected) {
+        await callFetchFunction(1);
+      } else {
+        console.log('Please Connect To Internet');
+      }
+    }
+  };
 
+  // Debounce the handleConnectivityChange function to avoid rapid calls
+  const debouncedHandleConnectivityChange = _.debounce(handleConnectivityChange, 1000);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      debouncedHandleConnectivityChange(state.isConnected);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isFocused]);
+  // useEffect(()=>{
+  //   callFetchFunction(1);
+  // },[isFocused])
+
+  const callFetchFunction = async (page) => {
+    try {
+      await isInternetConnected();
+      dispatch(recentReleasedRequest({ page: page }));
+      dispatch(popularAnimeRequest({ page: page }));
+      dispatch(newSeasonRequest({ page: page }));
+      dispatch(animeMoviesRequest({ page: page }));
+    } catch (err) {
+      console.log('Cant fetch data Please Connect To Internet');
+    }
+  };
+
+  useEffect(() => {
+    if (animeReducer?.status === 'Anime/recentReleasedFailure' || animeReducer?.recentReleased?.results?.length === 0) {
+      const retryAfter10Seconds = () => {
+        setTimeout(() => {
+          dispatch(recentReleasedRequest({page:1}));
+        }, 10000);
+      }
+      retryAfter10Seconds();
+    }
+    if (animeReducer?.status === 'Anime/popularAnimeFailure' || animeReducer?.popularAnime?.results?.length === 0) {
+      const retryAfter10Seconds = () => {
+        setTimeout(() => {
+          dispatch(popularAnimeRequest({page:1}));
+        }, 10000);
+      }
+      retryAfter10Seconds();
+    }
+    if (animeReducer?.status === 'Anime/animeMoviesFailure' || animeReducer?.animeMovies?.results?.length === 0) {
+      const retryAfter10Seconds = () => {
+        setTimeout(() => {
+          dispatch(animeMoviesRequest({page:1}));
+        }, 10000);
+      }
+      retryAfter10Seconds();
+    }
+    if(animeReducer?.status === 'Anime/newSeasonFailure' || animeReducer?.newSeason?.results?.length === 0) {
+      const retryAfter10Seconds = () => {
+        setTimeout(() => {
+          dispatch(newSeasonRequest({page:1}));
+        }, 10000);
+      }
+      retryAfter10Seconds();
+    }
+  }, [animeReducer?.status]);
+
+  //using NetInfo if the network is reachable call the fetch function
+  // if the network is not reachable then display the error message
+  // if the network is reachable then call the fetch function
+
+
+  useEffect(()=>{
+    switch(animeReducer?.status ){
+      case 'Anime/recentReleasedSuccess':
+        setRecentReleasedLoading(false);
+        break;
+      case 'Anime/newSeasonSuccess':
+        setNewSeasonLoading(false);
+        break;
+      case 'Anime/popularAnimeSuccess':
+        setPopularAnimeLoading(false);  
+        break;
+      case 'Anime/animeMoviesSuccess':
+        setAnimeMoviesLoading(false);
+        break;
+    }
+  },[animeReducer?.status])
   return (
     <SafeAreaView style={styles.container}>
       <Animated.ScrollView
@@ -164,7 +265,7 @@ const Home = ({navigation}) => {
                 fontWeight: '800',
                 letterSpacing: normalize(1.5)
               }}
-              >{useGreetings()}</Text>
+              >{greetings}</Text>
               </Animated.View>
               
               <View 
@@ -173,7 +274,7 @@ const Home = ({navigation}) => {
                 justifyContent:'space-evenly',               
                 }}>  
                 <FlatList
-                  data= {categories}
+                  data= {genrelist}
                   horizontal
                   initialNumToRender={3}
                   showsHorizontalScrollIndicator={false}
@@ -184,7 +285,7 @@ const Home = ({navigation}) => {
                     start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                     style={styles.bubble}
                     >
-                    <TouchableOpacity style={styles.bubble}>
+                    <TouchableOpacity style={styles.bubble} onPress={()=>navigation.navigate(item.route)}>
                     <Text
                     style={{fontSize:normalize(12),color:Colors.white,fontWeight:'700'}}
                     >{item.name}</Text>
@@ -220,30 +321,53 @@ const Home = ({navigation}) => {
             </ImageBackground>
           </ImageBackground>
         </View>
-        <View
+        {/* <View
         style={{marginHorizontal: normalize(10), marginTop:  normalize(20)}}
         >
           <Text
             style={styles.heading}
           >Continue Watching</Text>
 
-          <HorizontalFlatList data={animeList}/>
+        <HorizontalFlatList data={animeList}/> 
+        </View> */}
+        
+        <View style={{marginHorizontal: normalize(10), marginTop:  normalize(20)}}>
+          <Text style={styles.heading}>Recent Releases</Text>
+          {recentReleasedLoading ?
+            <HorizontalFlatListLoader data={[1,2,3,4]}/>
+            :
+            <HorizontalFlatList data={animeReducer?.recentReleased?.results|| []} value={"recentReleased"} fetchFunction={recentReleasedRequest}/>
+          }
         </View>
-        <View
-        style={{marginHorizontal: normalize(10), marginTop:  normalize(20)}}
-        >
-          <Text
-            style={styles.heading}
-          >More of what you like</Text>
-          <HorizontalFlatList data={suggestions}/>
+
+
+        <View style={{marginHorizontal: normalize(10), marginTop:  normalize(20)} }>
+          <Text style={styles.heading}>New Season</Text>
+          {newSeasonLoading ? 
+            <HorizontalFlatListLoader data={[1,2,3,4]}/>
+            :
+            <HorizontalFlatList data={animeReducer?.newSeason?.results|| [] } value={"newSeason"}  fetchFunction={newSeasonRequest}/>
+          }
         </View>
-        <View
-        style={{marginHorizontal: normalize(10), marginTop:  normalize(20)}}
-        >
-          <Text
-            style={styles.heading}
-          >Trending Action</Text>
-          <HorizontalFlatList data={actionanime}/>
+
+
+        <View style={{marginHorizontal: normalize(10), marginTop:  normalize(20)}}>
+          <Text style={styles.heading}>Popular Anime</Text>
+          {popularAnimeLoading ?          
+          <HorizontalFlatListLoader data={[1,2,3,4]}/>
+          :
+          <HorizontalFlatList data={animeReducer?.popularAnime?.results|| []} value={"popularAnime"} fetchFunction={popularAnimeRequest}/>
+          }
+        </View>
+
+
+        <View style={{marginHorizontal: normalize(10), marginTop:  normalize(20)}}>
+          <Text style={styles.heading}>Anime Movies</Text>
+          {animeMoviesLoading ?
+            <HorizontalFlatListLoader data={[1,2,3,4]}/>
+            :
+            <HorizontalFlatList data={animeReducer?.animeMovies?.results || []} value={"animeMovies"} fetchFunction={animeMoviesRequest}/>
+          }
         </View>
       </Animated.ScrollView>
     </SafeAreaView>
@@ -272,9 +396,10 @@ const styles = StyleSheet.create({
     right: 0
   },
   heading:{
-    fontSize: normalize(20),
+    fontSize: normalize(22),
     fontWeight: '700',
     color: Colors.white,
+    marginBottom: normalize(10),
     marginLeft: normalize(10),
   }
 })

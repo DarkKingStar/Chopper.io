@@ -12,6 +12,8 @@ import ListHome from '../screen/tabs/dashboard/ListHome';
 import PlayTab from '../component/PlayTab';
 import Account from '../screen/tabs/dashboard/Account';
 import Settings from '../screen/tabs/dashboard/Settings';
+import GenreList from '../screen/tabs/dashboard/GenreList';
+import GenreContent from '../screen/tabs/dashboard/GenreContent';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -112,6 +114,8 @@ const HomeScreenStack = {
   List: ListHome,
   Profile: Account,
   Settings: Settings,
+  GenreList: GenreList,
+  GenreContent: GenreContent
 }
 const HomeScreen = () =>{
  return(

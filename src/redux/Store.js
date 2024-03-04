@@ -7,7 +7,8 @@ import AuthReducer from './reducer/AuthReducer';
 import UserReducer from './reducer/UserReducer';
 
 let sagaMiddleware = createSagaMiddleware();
-const middleware = [sagaMiddleware, logger];
+const middleware = [sagaMiddleware];
+// const middleware = [sagaMiddleware, logger];
 
 export default configureStore({
   reducer: {

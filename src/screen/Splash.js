@@ -77,7 +77,7 @@ import {
           }}
           source={Images.headingImg}
         />
-        <Text style={styles.title}>Build version 1.0.1.1</Text>
+        <Text style={styles.title}>Build version 1.0.1</Text>
       </ImageBackground>
       </ImageBackground>
     );
