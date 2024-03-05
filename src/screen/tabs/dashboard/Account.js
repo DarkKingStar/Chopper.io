@@ -1,11 +1,12 @@
 import { FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import normalize from '../../../utils/helpers/normalize'
 import { Icons } from '../../../constants/icons'
 import { Colors } from '../../../constants/colors'
-import { useDispatch } from 'react-redux'
-import { logoutRequest } from '../../../redux/reducer/AuthReducer'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { logoutRequest, refreshTokenRequest } from '../../../redux/reducer/AuthReducer'
+import {useIsFocused} from '@react-navigation/native';
+import { userInfoRequest } from '../../../redux/reducer/UserReducer'
 const Options=[
   {
     label:'Logout',
@@ -17,6 +18,21 @@ const Options=[
 
 const Account = ({navigation}) => {
   const dispatch = useDispatch();
+  const authReducer = useSelector(state => state.AuthReducer);
+  const userReducer  = useSelector(state => state.UserReducer);
+  const isFocused =  useIsFocused();
+
+  useEffect(()=>{
+    if(userReducer?.status==="User/userInfoFailure" && authReducer?.status!=="Auth/refreshTokenFailure"){
+       dispatch(refreshTokenRequest());
+    }
+  },[userReducer?.status]);
+
+  useEffect(()=>{
+    if(isFocused){
+        dispatch(userInfoRequest());
+    }
+  },[isFocused]);
   const renderItem = ({item}) =>(
     <TouchableOpacity 
     onPress={()=>item.action==="logout"? dispatch(logoutRequest()):item.action}

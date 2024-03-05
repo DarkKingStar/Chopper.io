@@ -20,7 +20,7 @@ const HorizontalFlatList = ({
   const [hasPageNext,setHasPageNext] = useState(false);
   const [hasFailed,setHasFailed] = useState(false);
   useEffect(()=>{
-    console.log("hasNextPage ",value,":===========",animeReducer[value].hasNextPage)
+    // console.log("hasNextPage ",value,":===========",animeReducer[value].hasNextPage);
     if(animeReducer[value]?.hasNextPage!==undefined || animeReducer[value]?.hasNextPage !==null)
     {
       setHasPageNext(animeReducer[value]?.hasNextPage)
@@ -28,14 +28,9 @@ const HorizontalFlatList = ({
   },[animeReducer[value]])
 
   const callFetchFunction = async(page) => {
-      try{
-        await isInternetConnected();
-        setPage(page);
-        dispatch(fetchFunction({page: page}));
-      }catch(err){
-        console.log('Cant fetch data Please Connect To Internet');
-        setHasFailed(true);
-      }
+    setPage(page);
+    dispatch(fetchFunction({page: page}));
+  
   }
 
   const handleConnectivityChange = async isConnected => {
@@ -67,18 +62,17 @@ const HorizontalFlatList = ({
         horizontal
         scrollEnabled={data?.length>3}
         initialNumToRender={data?.length>3?4:data?.length}
-        
+        decelerationRate={0.9}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => {
           const subtitle = item?.episodeNumber!=undefined?"E"+item.episodeNumber: (item?.released!=undefined?item.released:(item?.recentEpisodes!=undefined? "E"+item.recentEpisodes.split(" ")[1] : ""))
           return(<View style={styles.item}>
-            <Image source={{uri:item?.image}} style={styles.poster} resizeMode='stretch' PlaceholderContent={<ActivityIndicator />}/>
+            <Image source={{uri:item?.image}} style={styles.poster} resizeMode='stretch' PlaceholderContent={<ActivityIndicator color={Colors.red} size="large"/>}/>
             <Text style={styles.itemname} numberOfLines={1} ellipsizeMode='tail'>{item?.title}</Text>
             <Text style={styles.itemSE} numberOfLines={1} ellipsizeMode='tail'>{subtitle}</Text>
           </View>)
         }}
         ListFooterComponent={ hasPageNext && <HorizontalFlatListLoader data={[1]}/>}
-        onEndReachedThreshold={1}
         keyExtractor={(item, index) => index.toString()}
         onEndReached={() => hasPageNext && callFetchFunction(page+1)}
       />
@@ -102,7 +96,8 @@ const styles = StyleSheet.create({
   poster:{
     height:normalize(135),
     borderTopLeftRadius:normalize(5),
-    borderTopRightRadius:normalize(5)
+    borderTopRightRadius:normalize(5),
+    backgroundColor: 'rgba(0,0,0,0.15)'
   },
   itemname:{
     textAlign:'center',

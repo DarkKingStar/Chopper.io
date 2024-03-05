@@ -12,27 +12,35 @@ const Search = () => {
   const dispatch = useDispatch();
   const animeReducer = useSelector(state => state.AnimeReducer);
   const [searchQuery,setSearchQuery] = useState("");
-  useEffect(()=>{
-    if(searchQuery.length>3){
+  const [inputFocus,setInputFocus] = useState(false);
+
+  const callFetchFunction = async() => {
+    if(searchQuery?.length>2){
       dispatch(animeSearchRequest({data:searchQuery}))
     }
+  }
+
+  useEffect(()=>{
+    callFetchFunction();
   },[searchQuery])
 
   return (
     <View>
-      <View style={styles.search}>
+      <View style={[styles.search,{borderColor: inputFocus ? Colors.red : Colors.white}]}>
       <TextInput 
         placeholder='Type here to Search Anime...'
         value={searchQuery}
         onChange={(e)=>setSearchQuery(e.nativeEvent.text)}
         style={styles.searchinput}
+        onFocus={()=>setInputFocus(true)}
+        onBlur={()=>setInputFocus(false)}
       />
-      <TouchableOpacity style={styles.searchbtn}>
-        <Image source={Icons.search} style={{width:normalize(20),height:normalize(20)}}/>
+      <TouchableOpacity style={styles.searchbtn} onPress={()=>callFetchFunction()}>
+        <Image source={inputFocus ? Icons.searchActive : Icons.search} style={{width:normalize(20),height:normalize(20)}}/>
       </TouchableOpacity>
       </View>
       <FlatList
-        data={(searchQuery != "" && animeReducer?.animeSearch?.results) || []}
+        data={(searchQuery?.length>2 && animeReducer?.animeSearch?.results) || []}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (

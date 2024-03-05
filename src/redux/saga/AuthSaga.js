@@ -18,9 +18,12 @@ import {
   logoutSuccess,
   logoutFailure,
 
+  refreshTokenFailure,
+  refreshTokenSuccess
+
 } from '../reducer/AuthReducer';
 import routes from '../../constants/routes';
-import {deleteItem, storeObjectData} from '../LocalStore';
+import {deleteItem, storeData} from '../LocalStore';
 
 let getItem = state => state.AuthReducer;
 
@@ -28,17 +31,17 @@ let getItem = state => state.AuthReducer;
 export function* guestLoginSaga(action) {
   try {
     yield call(
-      storeObjectData,
+      storeData,
       constants.TOKEN,
       action.payload.token,
     );
     yield call(
-      storeObjectData,
+      storeData,
       constants.REFRESH_TOKEN,
       action.payload.refresh_token,
     );
     yield call(
-      storeObjectData, 
+      storeData, 
       constants.USER_ID,
       action.payload.user_id,
     );
@@ -70,14 +73,14 @@ export function* loginSaga(action) {
     let response = yield call(postApi, routes.LOGIN, action.payload, header);
     console.log('response -- ', response.data);
     if (response.data.error == false) {
-      yield call(storeObjectData, constants.TOKEN, response.data.access_token);
+      yield call(storeData, constants.TOKEN, response.data.access_token);
       yield call(
-        storeObjectData,
+        storeData,
         constants.REFRESH_TOKEN,
         response.data.refresh_token,
       );
       yield call(
-        storeObjectData,
+        storeData,
         constants.USER_ID,
         response.data.userDetails._id,
       );
@@ -152,6 +155,45 @@ export function* logoutSaga() {
     showErrorAlert('Logout Failed');
   }
 }
+
+/* refresh token */
+export function* refreshTokenSaga() {
+  try {
+    const item = yield select(getItem);
+    let header = {
+      Accept: 'application/json',
+      contenttype: 'application/json',
+      accesstoken: item?.refresh_token,
+    }
+    let response = yield call(postApi, routes.REFRESHTOKEN, {}, header);
+    console.log('refresh token response -- ', response.data);
+    if (response?.data?.error == false) {
+      yield call(
+        storeData,
+        constants.TOKEN,
+        response.data.access_token
+      )
+      yield call(
+        storeData,
+        constants.REFRESH_TOKEN,
+        response.data.refresh_token
+      )
+      yield put(
+        refreshTokenSuccess({
+          token: response.data.access_token,
+          refresh_token: response.data.refresh_token 
+        })
+      )
+    } else {
+      yield put(refreshTokenFailure(response.data));
+      yield put(logoutSaga());
+    }
+  }catch(error){
+    yield put(refreshTokenFailure(error));
+    yield put(logoutSaga());
+  }
+}
+
 
 const watchFunction = [
   (function* () {

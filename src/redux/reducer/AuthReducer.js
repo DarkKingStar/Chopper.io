@@ -17,6 +17,7 @@ const guestdata ={
 const initialState = {
   status: '',
   isLoading: true,
+  error:'',
   isStart: null,
   token: null,
   user_id:null,
@@ -98,6 +99,19 @@ const AuthSlice = createSlice({
       state.status = action.type;
     },
 
+    /*refresh token */
+    refreshTokenRequest(state, action) {
+      state.status = action.type;
+    },
+    refreshTokenSuccess(state, action) {
+      state.token = action.payload?.access_token;
+      state.refresh_token = action.payload?.refresh_token;
+      state.status = action.type;
+    },
+    refreshTokenFailure(state, action) {
+      state.error = action.error;
+    }
+
   },
 });
 
@@ -128,6 +142,12 @@ export const {
   logoutRequest,
   logoutSuccess,
   logoutFailure,
+
+  /*refresh token */
+  refreshTokenRequest,
+  refreshTokenSuccess,
+  refreshTokenFailure,
+
 
 } = AuthSlice.actions;
 
