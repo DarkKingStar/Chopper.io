@@ -55,6 +55,8 @@ const PlayTab = () => {
   const [isShowControls, setIsShowControls] = useState(true);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
 
+  const [swipeDownComplete,setSwipeDownComplete] = useState(true);
+
   const [quality, setQuality] = useState('q480p');
 
   const [playbackTime, setPlaybackTime] = useState(0.0);
@@ -65,7 +67,7 @@ const PlayTab = () => {
 
   const slideAnimation = useRef(new Animated.Value(0)).current;
 
-  const videoRef = useRef(null);
+  const videoRef = useRef(0);
 
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
@@ -151,32 +153,36 @@ const PlayTab = () => {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) =>
-        gestureState.dy > 5 && gestureState.vy > 1,
+        gestureState.dy > 3 && gestureState.vy > 1 || gestureState.dy < 3 && gestureState.vy < 1,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > Dimensions.get('window').height * 0.2) {//  swipe down
+            setIsMinimize(true);
+        }else if(gestureState.dy < -Dimensions.get('window').height * 0.2){ // swipe up
+            setIsMinimize(false);
+            setSwipeDownComplete(false);
+        } 
+      },
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy > Dimensions.get('window').height * 0.2) {
-          setIsMinimize(true);
-        }
+        if (gestureState.dy > Dimensions.get('window').height * 0.2) { //  swipe down
+            setIsMinimize(true);
+          }else if(gestureState.dy < -Dimensions.get('window').height * 0.2){ //swipe up
+            setIsMinimize(false);
+            setSwipeDownComplete(false);
+        } 
       },
     }),
   ).current;
 
-  const panResponder0 = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gestureState) => {
-        // Update translateY based on the vertical movement
-        alert('Swipe-up gesture detected!');
-
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy < -50) {
-          alert('Swipe-up gesture detected!');
-        }
-      },
-    })
-  ).current;
-
+  useEffect(() => {
+    const animationListener = slideAnimation.addListener(({ value }) => {
+      if (value === 0) {
+        setSwipeDownComplete(true);
+      }
+    });
+    return () => {
+      slideAnimation.removeListener(animationListener);
+    };
+  }, [slideAnimation]);
   const handleLoad = meta => {
     setDuration(meta.duration);
     if (videoRef.current) {
@@ -193,26 +199,37 @@ const PlayTab = () => {
     }
   };
 
+  const swipeDownAnimation = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Dimensions.get('window').height,0],
+  });
+
+  const swipeUpAnimation = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [
+      0,
+      -Dimensions.get('window').height,
+    ],
+  })
+
   return (
     <Animated.View
-      {...panResponder.panHandlers}
+    {...(isFullscreen ? {} : panResponder.panHandlers)}
       style={[
-        isMinimize ? styles.minimizedcontainer : styles.openmodalcontainer,
+        swipeDownComplete ? styles.minimizedcontainer : isMinimize ? [styles.openmodalcontainer, { height: 0, bottom:0, marginBottom:53 }] : [styles.openmodalcontainer,{top:0}],
         {
-          bottom: isMinimize && isKeyboardVisible ? 0 : 53,
-          transform: [
+          bottom: swipeDownComplete && isKeyboardVisible ? 0 : 53,
+          transform: [  isMinimize ?
             {
-              translateX: slideAnimation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [
-                  0,
-                  isMinimize ? Dimensions.get('window').height : 0,
-                ],
-              }),
-            },
+              translateY: swipeUpAnimation
+            }:{
+              translateY: swipeDownAnimation
+            }
           ],
         },
-      ]}>
+      ]}
+      onAnimationEnd={() => setIsMinimize(false)}
+      >
       <StatusBar hidden={isFullscreen && !isShowControls} />
       {!isMinimize && (isShowControls || !isVideoLoaded) && (
         <>
@@ -247,7 +264,7 @@ const PlayTab = () => {
             {!isFullscreen && (
               <TouchableOpacity
                 onPress={() => setIsMinimize(true)}
-                style={{padding: normalize(5)}}>
+                style={{paddingHorizontal: normalize(5)}}>
                 <Image
                   source={Icons.arrowDown}
                   style={{width: normalize(20), height: normalize(20)}}
@@ -257,11 +274,11 @@ const PlayTab = () => {
           </View>
         </>
       )}
-      {/* Main View tag for all three way to render the tabScreen */}
-      <View style={styles.fullscreencontainer}>
+      {/* Main View tag for all three way to render the tabScreen minimize, maximize and fullscreen */}
+      <View style={styles.playTabcontainer}>
         <View
           style={
-            isMinimize
+            swipeDownComplete && !isFullscreen
               ? {
                   flexDirection: 'row',
                   marginHorizontal: normalize(8),
@@ -269,15 +286,15 @@ const PlayTab = () => {
               : {height: isFullscreen ? '100%' : normalize(200)}
           }>
           <Pressable
-            onLongPress={()=>isMinimize && setIsMinimize(false)}
+            onLongPress={()=>isMinimize && setIsMinimize(false) || setSwipeDownComplete(false)}
             
             onPress={() =>
-              isMinimize
-                ? setIsMinimize(false)
+              swipeDownComplete
+                ? setIsMinimize(false) || setSwipeDownComplete(false)
                 : (setIsShowControls(prev => !prev))
             }
             style={
-              isMinimize
+              swipeDownComplete
                 ? {flexDirection: 'row', gap: normalize(10), flex: 1}
                 : {height: isFullscreen ? '100%' : normalize(200)}
             }>
@@ -289,9 +306,9 @@ const PlayTab = () => {
                   uri: videoOptions[quality]?.url,
                   type: 'm3u8',
                 }}
-                style={isMinimize ? styles.videoFrame : {flex: 1}}
+                style={swipeDownComplete ? styles.videoFrame : {flex: 1}}
                 resizeMode={
-                  isFullscreen ? 'contain' : isMinimize ? 'cover' : 'contain'
+                  isFullscreen ? 'contain' : swipeDownComplete ? 'cover' : 'contain'
                 }
                 paused={!isPlay}
                 rate={playbackSpeed}
@@ -305,7 +322,7 @@ const PlayTab = () => {
               <Image
                 source={Images.videobg}
                 style={
-                  isMinimize
+                  swipeDownComplete
                     ? styles.videoFrame
                     : {
                         width: '100%',
@@ -316,8 +333,8 @@ const PlayTab = () => {
               />
             )}
             {/* items in for bottom PlayTab */}
-            {isMinimize && (
-              <View style={{flex: 1}}>
+            {swipeDownComplete && (
+              <View style={{flex: 1}} {...panResponder.panHandlers}>
                 <Text
                   numberOfLines={1}
                   ellipsizeMode="tail"
@@ -328,7 +345,7 @@ const PlayTab = () => {
               </View>
             )}
           </Pressable>
-          {isMinimize && (
+          {swipeDownComplete && (
             <TouchableOpacity onPress={() => setIsPlay(prev => !prev)}>
               <Image
                 source={isPlay ? Icons.pauseButton : Icons.playButton}
@@ -347,7 +364,7 @@ const PlayTab = () => {
               justifyContent: 'flex-end',
             }}>
             {/* Video Slider */}
-            <View
+            {isVideoLoaded && <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-evenly',
@@ -368,6 +385,7 @@ const PlayTab = () => {
               />
               <Text>{SecondstoTime(duration)}</Text>
             </View>
+            }
             {/* Video Options tab */}
             <View
               style={{
@@ -397,6 +415,9 @@ const PlayTab = () => {
                 onPress={() => skipvideo(playbackTime + skipSeconds)}>
                 <Image source={Icons.fastForward} style={styles.button} />
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsOptionOpen(prev => !prev)}>
+                <Image source={Icons.gear} style={styles.button} />
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsFullscreen(prev => !prev)}>
                 <Image
                   source={
@@ -405,9 +426,7 @@ const PlayTab = () => {
                   style={styles.button}
                 />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsOptionOpen(prev => !prev)}>
-                <Image source={Icons.threedots} style={styles.button} />
-              </TouchableOpacity>
+              
             </View>
             {/* Settings Modal - three dots */}
             <Modal
@@ -514,9 +533,11 @@ const PlayTab = () => {
         )}
       </View>
       {!isMinimize && !isFullscreen && (
-        <ScrollView style={{marginTop: normalize(200)}}>
-          <VideoDesc />
+      <View  style={{marginTop: normalize(200)}}>
+        <VideoDesc />
+        <ScrollView>
         </ScrollView>
+      </View>
       )}
     </Animated.View>
   );
@@ -540,11 +561,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-    top: 0,
     height: '100%',
     position: 'absolute',
   },
-  fullscreencontainer: {
+  playTabcontainer: {
     ...StyleSheet.absoluteFill,
   },
   playpause: {

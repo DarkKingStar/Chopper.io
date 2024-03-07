@@ -29,6 +29,14 @@ const Account = ({navigation}) => {
   },[userReducer?.status]);
 
   useEffect(()=>{
+    if(authReducer?.status==="Auth/refreshTokenSuccess"){
+      dispatch(userInfoRequest());
+    }else if(authReducer?.status==="Auth/refreshTokenFailure"){
+      dispatch(logoutRequest());
+    }
+  },[authReducer?.status]);
+
+  useEffect(()=>{
     if(isFocused){
         dispatch(userInfoRequest());
     }

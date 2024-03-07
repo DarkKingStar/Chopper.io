@@ -19,9 +19,9 @@ export function* userInfoSaga() {
       accesstoken: item?.token,
     };
     let response = yield call(postApi, routes.USERINFO, {id: item?.user_id}, header);
-    console.log('userInfo response -- ', response.data);
-    if (response.status == false) {
+    if (response.status == 200) {
       yield put(userInfoSuccess(response.data));
+      console.log('userInfo response -- ', response.data);
     }else{
       yield put(userInfoFailure(response.data));
     }
