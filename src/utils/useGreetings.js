@@ -10,14 +10,14 @@ function useGreetings() {
     let newGreeting = '';
 
     if (hour >= 0 && hour < 12) {
-      newGreeting = 'Ohayo Otaku';
+      newGreeting = 'Ohayo';
     } else if (hour >= 12 && hour < 18) {
-      newGreeting = 'Konichiwa Otaku';
+      newGreeting = 'Konichiwa';
     } else if (hour >= 18 && hour <= 23) {
-      newGreeting = 'Konbanwa Otaku';
+      newGreeting = 'Konbanwa';
     }
     else{
-      newGreeting = 'Oyasumi Otaku';
+      newGreeting = 'Oyasumi';
     }
     setGreeting(newGreeting);
   }, []);

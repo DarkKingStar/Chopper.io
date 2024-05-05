@@ -5,6 +5,7 @@ import RootSaga from './saga/RootSaga';
 import AnimeReducer from './reducer/AnimeReducer';
 import AuthReducer from './reducer/AuthReducer';
 import UserReducer from './reducer/UserReducer';
+import TabReducer from './reducer/TabReducer';
 
 let sagaMiddleware = createSagaMiddleware();
 const middleware = [sagaMiddleware];
@@ -14,7 +15,8 @@ export default configureStore({
   reducer: {
     AuthReducer: AuthReducer,
     AnimeReducer: AnimeReducer,
-    UserReducer: UserReducer
+    UserReducer: UserReducer,
+    TabReducer: TabReducer,
   },
   middleware,
 });

@@ -30,6 +30,7 @@ import {
   recentReleasedRequest,
   newSeasonRequest,
 } from '../../../redux/reducer/AnimeReducer';
+import { userInfoRequest } from '../../../redux/reducer/UserReducer';
 
 const genrelist = [
   {
@@ -118,6 +119,8 @@ const Home = ({navigation}) => {
   const dispatch = useDispatch();
   const greetings = useGreetings();
   const animeReducer = useSelector(state => state.AnimeReducer);
+  const userReducer = useSelector(state => state.UserReducer);
+  const userInfo = userReducer?.user_details;
   const isFocused = useIsFocused();
   const [scrollY, setScrollY] = useState(new Animated.Value(0));
   const [recentReleasedLoading ,setRecentReleasedLoading] = useState(true);
@@ -158,6 +161,7 @@ const Home = ({navigation}) => {
   }, [isFocused]);
 
   const callFetchFunction = async (page) => {
+      dispatch(userInfoRequest());
       dispatch(popularAnimeRequest({page}));
       dispatch(recentReleasedRequest({page}));
       dispatch(newSeasonRequest({page}));
@@ -278,9 +282,9 @@ const Home = ({navigation}) => {
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Profile')}>
                   <Image
-                    source={{
-                      uri: 'https://img.freepik.com/premium-photo/anime-male-avatar_950633-956.jpg?ga=GA1.1.1733710313.1706420280&',
-                    }}
+                    source={userInfo?.profile_image ? {
+                      uri: userInfo?.profile_image,
+                    }: Images.avatar}
                     style={{
                       width: normalize(30),
                       height: normalize(30),
@@ -294,7 +298,7 @@ const Home = ({navigation}) => {
                     fontWeight: '800',
                     letterSpacing: normalize(1.5),
                   }}>
-                  {greetings}
+                  {greetings+" "}{userInfo?.name ? userInfo?.name.split(" ")[0] : "Otaku"}
                 </Text>
               </Animated.View>
 
@@ -381,7 +385,7 @@ const Home = ({navigation}) => {
             <HorizontalFlatListLoader data={[1, 2, 3, 4]} />
           ) : (
             <HorizontalFlatList
-              data={animeReducer?.popularAnime?.results || []}
+              navigation={navigation} data={animeReducer?.popularAnime?.results || []}
               value={'popularAnime'}
               fetchFunction={popularAnimeRequest}
             />
@@ -395,7 +399,7 @@ const Home = ({navigation}) => {
             <HorizontalFlatListLoader data={[1, 2, 3, 4]} />
           ) : (
             <HorizontalFlatList
-              data={animeReducer?.recentReleased?.results || []}
+              navigation={navigation} data={animeReducer?.recentReleased?.results || []}
               value={'recentReleased'}
               fetchFunction={recentReleasedRequest}
             />
@@ -409,7 +413,7 @@ const Home = ({navigation}) => {
             <HorizontalFlatListLoader data={[1, 2, 3, 4]} />
           ) : (
             <HorizontalFlatList
-              data={animeReducer?.newSeason?.results || []}
+              navigation={navigation} data={animeReducer?.newSeason?.results || []}
               value={'newSeason'}
               fetchFunction={newSeasonRequest}
             />
@@ -423,7 +427,7 @@ const Home = ({navigation}) => {
             <HorizontalFlatListLoader data={[1, 2, 3, 4]} />
           ) : (
             <HorizontalFlatList
-              data={animeReducer?.animeMovies?.results || []}
+              navigation={navigation}  data={animeReducer?.animeMovies?.results || []}
               value={'animeMovies'}
               fetchFunction={animeMoviesRequest}
             />

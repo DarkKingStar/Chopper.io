@@ -12,15 +12,19 @@ const AnimeSlice = createSlice({
     popularAnime: {},
     animeMovies: {},
     animeSearch:{},
+    animeDetails:{},
+    animeEpisodes:{},
+    genrelist:{},
+    genreanimes:{},
     status:'',
-    loading:false,
+    isLoading:false,
   },
   reducers: {
     recentReleasedRequest: (state, action) => {
       state.status = action.type;
     },
     recentReleasedSuccess: (state, action) => {
-      if(state?.recentReleased?.results && state?.recentReleased?.results?.lenght !== 0){
+      if(state?.recentReleased?.results && state?.recentReleased?.results?.length !== 0){
         let results = state?.recentReleased?.results?.concat(action?.payload?.results);
         results = results.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         state.recentReleased = action.payload;
@@ -38,7 +42,7 @@ const AnimeSlice = createSlice({
       state.status = action.type;
     },
     newSeasonSuccess: (state, action) => {
-      if(state?.newSeason?.results && state?.newSeason?.results?.lenght !== 0){
+      if(state?.newSeason?.results && state?.newSeason?.results?.length !== 0){
         let results = state?.newSeason?.results?.concat(action?.payload?.results);
         results = results.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         state.newSeason = action.payload;
@@ -56,7 +60,7 @@ const AnimeSlice = createSlice({
       state.status = action.type;
     },
     popularAnimeSuccess: (state, action) => {
-      if(state?.popularAnime?.results && state?.popularAnime?.results?.lenght !== 0){
+      if(state?.popularAnime?.results && state?.popularAnime?.results?.length !== 0){
         let results = state?.popularAnime?.results?.concat(action?.payload?.results);
         results = results.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         state.popularAnime = action.payload;
@@ -74,7 +78,7 @@ const AnimeSlice = createSlice({
       state.status = action.type;
     },
     animeMoviesSuccess: (state, action) => {
-      if(state?.animeMovies?.results && state?.animeMovies?.results?.lenght !== 0){
+      if(state?.animeMovies?.results && state?.animeMovies?.results?.length !== 0){
         let results = state?.animeMovies?.results?.concat(action?.payload?.results);
         results = results.filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
         state.animeMovies = action.payload;
@@ -97,7 +101,51 @@ const AnimeSlice = createSlice({
     },
     animeSearchFailure: (state, action) => {
       state.status = action.type;
-    }
+    },
+
+
+    animeDetailsRequest: (state, action) => { 
+      state.status = action.type;
+    },
+    animeDetailsSuccess: (state, action) => {
+      state.animeDetails = action.payload;
+      state.status = action.type;
+    },
+    animeDetailsFailure: (state, action) => {
+      state.status = action.type;
+    },
+
+    animeEpisodesRequest: (state, action) => {
+      state.status = action.type;
+    },
+    animeEpisodesSuccess: (state, action) => {
+      state.animeEpisodes = action.payload;
+      state.status = action.type;
+    },
+    animeEpisodesFailure: (state, action) => {
+      state.status = action.type;
+    },
+
+    getGenreListRequest: (state, action) => {
+      state.status = action.type;
+    },
+    getGenreListSuccess: (state, action) => {
+      state.genrelist = action.payload;
+      state.status = action.type;
+    },
+    getGenreListFailure: (state, action) => {
+      state.status = action.type;
+    },
+    getGenreAnimeRequest: (state, action) => {
+      state.status = action.type;
+    },
+    getGenreAnimeSuccess: (state, action) => {
+      state.genreanimes = action.payload;
+      state.status = action.type;
+    },
+    getGenreAnimeFailure: (state, action) => {
+      state.status = action.type;
+    },
 
   },
 });
@@ -122,7 +170,23 @@ export const {
 
   animeSearchRequest,
   animeSearchSuccess,
-  animeSearchFailure
+  animeSearchFailure,
+
+  animeDetailsRequest,
+  animeDetailsSuccess,
+  animeDetailsFailure,
+
+  animeEpisodesRequest,
+  animeEpisodesSuccess,
+  animeEpisodesFailure,
+
+  getGenreListRequest,
+  getGenreListSuccess,
+  getGenreListFailure,
+
+  getGenreAnimeRequest,
+  getGenreAnimeSuccess,
+  getGenreAnimeFailure,
 
 } = AnimeSlice.actions;
 

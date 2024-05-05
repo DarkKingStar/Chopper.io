@@ -9,6 +9,7 @@ export async function getApi(url, header) {
     headers: {
       Accept: header.Accept,
       'Content-type': header.contenttype,
+      Authorization: 'Bearer' + ' ' + header?.accesstoken,
     },
   });
 }
@@ -60,8 +61,6 @@ export async function getApiWithParamandSignal(url, param, signal, header) {
 
 export async function postApi(url, payload, header) {
   console.log('PostApi: ', `${constants.BASE_URL}/${url}`);
-  console.log("payload", payload);
-
   return await axios.post(`${constants.BASE_URL}/${url}`, payload, {
     headers: {
       Accept: header.Accept,

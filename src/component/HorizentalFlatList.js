@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {Image} from 'react-native-elements';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Touchable, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/colors';
 import normalize from '../utils/helpers/normalize';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import NetInfo from '@react-native-community/netinfo';
 import _ from 'lodash';
 
 const HorizontalFlatList = ({
+    navigation,
     data,
     value,
     fetchFunction,
@@ -66,11 +67,11 @@ const HorizontalFlatList = ({
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => {
           const subtitle = item?.episodeNumber!=undefined?"E"+item.episodeNumber: (item?.released!=undefined?item.released:(item?.recentEpisodes!=undefined? "E"+item.recentEpisodes.split(" ")[1] : ""))
-          return(<View style={styles.item}>
+          return(<TouchableOpacity style={styles.item} onPress={() => navigation.navigate("AnimeDetails", { animeId: item?.id, animeName: item?.title })}>
             <Image source={{uri:item?.image}} style={styles.poster} resizeMode='stretch' PlaceholderContent={<ActivityIndicator color={Colors.red} size="large"/>}/>
             <Text style={styles.itemname} numberOfLines={1} ellipsizeMode='tail'>{item?.title}</Text>
             <Text style={styles.itemSE} numberOfLines={1} ellipsizeMode='tail'>{subtitle}</Text>
-          </View>)
+          </TouchableOpacity>)
         }}
         ListFooterComponent={ hasPageNext && <HorizontalFlatListLoader data={[1]}/>}
         keyExtractor={(item, index) => index.toString()}

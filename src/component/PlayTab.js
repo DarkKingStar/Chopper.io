@@ -62,6 +62,8 @@ const PlayTab = () => {
   const [playbackTime, setPlaybackTime] = useState(0.0);
   const [duration, setDuration] = useState(0);
 
+  const lastTapTimeRef = useRef(null);
+
   const [skipSeconds, setSkipSeconds] = useState(5.0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
 
@@ -71,6 +73,11 @@ const PlayTab = () => {
 
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
+  /**
+   * Remove event listeners for keyboardDidShow and keyboardDidHide events.
+   *
+   * @returns {void}
+   */
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -87,6 +94,12 @@ const PlayTab = () => {
     };
   }, []);
 
+  /**
+   * Adds a listener for the hardware back button and enables it to toggle
+   * between fullscreen and minimized states when pressed.
+   *
+   * @returns {void}
+   */
   useEffect(() => {
     const handleBackButton = () => {
       if (isFullscreen) {
@@ -107,6 +120,13 @@ const PlayTab = () => {
       backHandlerSubscription.remove();
     };
   }, [isMinimize, isFullscreen]);
+
+  /**
+   * Updates the visibility of the navigation bar when the video is
+   * fullscreen or minimized.
+   *
+   * @return {void}
+   */
   useEffect(() => {
     if(isFullscreen)
       hideNavigationBar();
@@ -114,6 +134,12 @@ const PlayTab = () => {
       showNavigationBar();
   }, [isFullscreen, isShowControls]);
 
+  /**
+   * Updates the device orientation when the video goes fullscreen or
+   * minimized.
+   *
+   * @return {void}
+   */
   useEffect(() => {
     if (isFullscreen) {
       Orientation.lockToLandscape();
@@ -122,10 +148,14 @@ const PlayTab = () => {
     }
   }, [isFullscreen]);
 
-  const handleProgress = progress => {
-    setPlaybackTime(progress.currentTime);
-  };
+  
 
+  /**
+   * Hides the controls after 5 seconds if the video is playing and
+   * the option modal is not open.
+   *
+   * @return {void}
+   */
   useEffect(() => {
     let controlsTimeout;
 
@@ -140,39 +170,73 @@ const PlayTab = () => {
     return () => {
       clearTimeout(controlsTimeout);
     };
-  }, [isShowControls,isPlay, isOptionOpen]);
+  }, [isShowControls, isPlay, isOptionOpen]);
 
+  /**
+   * Animates the slideAnimation value to 0 or 1 based on isMinimize.
+   *
+   * @return {void}
+   */
   useEffect(() => {
     Animated.timing(slideAnimation, {
       toValue: isMinimize ? 0 : 1,
-      duration: 500,
+      duration: 350,
       useNativeDriver: false,
     }).start();
   }, [isMinimize]);
 
+  /**
+   * @description Creates a PanResponder instance that listens for swipe up and down
+   * gestures to minimize or maximize the player view.
+   */
   const panResponder = useRef(
     PanResponder.create({
+      /**
+       * Determines if the pan responder should be set based on gesture state.
+       *
+       * @param {Object} _ - unused event
+       * @param {Object} gestureState - the state of the pan gesture
+       * @return {boolean} boolean indicating whether the pan responder should be set
+       */
       onMoveShouldSetPanResponder: (_, gestureState) =>
         gestureState.dy > 3 && gestureState.vy > 1 || gestureState.dy < 3 && gestureState.vy < 1,
+      /**
+       * Handler for the pan responder move event.
+       *
+       * @param {Object} _ - unused event
+       * @param {Object} gestureState - the state of the pan gesture
+       */
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > Dimensions.get('window').height * 0.2) {//  swipe down
-            setIsMinimize(true);
-        }else if(gestureState.dy < -Dimensions.get('window').height * 0.2){ // swipe up
-            setIsMinimize(false);
-            setSwipeDownComplete(false);
-        } 
+          setIsMinimize(true);
+        } else if (gestureState.dy < -Dimensions.get('window').height * 0.2) { // swipe up
+          setIsMinimize(false);
+          setSwipeDownComplete(false);
+        }
       },
+      /**
+       * Handle the release of the PanResponder
+       *
+       * @param {Object} _ - placeholder for the unused event
+       * @param {Object} gestureState - the state of the gesture
+       */
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > Dimensions.get('window').height * 0.2) { //  swipe down
-            setIsMinimize(true);
-          }else if(gestureState.dy < -Dimensions.get('window').height * 0.2){ //swipe up
-            setIsMinimize(false);
-            setSwipeDownComplete(false);
-        } 
+          setIsMinimize(true);
+        } else if (gestureState.dy < -Dimensions.get('window').height * 0.2) { //swipe up
+          setIsMinimize(false);
+          setSwipeDownComplete(false);
+        }
       },
     }),
   ).current;
 
+  /**
+   * @description Adds a listener to the animation and cleans it up on unmount.
+   * Checks if the animation value is 0, if it is set the swipeDownComplete to true.
+   *
+   * @returns {void}
+   */
   useEffect(() => {
     const animationListener = slideAnimation.addListener(({ value }) => {
       if (value === 0) {
@@ -183,6 +247,37 @@ const PlayTab = () => {
       slideAnimation.removeListener(animationListener);
     };
   }, [slideAnimation]);
+
+  /**
+   * Handles the video press event and toggles controls based on tap delay.
+   *
+   * @return {type} undefined
+   */
+  const handleVideoPress = () => {
+    const now = new Date().getTime();
+    const DOUBLE_TAP_DELAY = 300; // Adjust as needed for your use case (in milliseconds)
+
+    if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
+      console.log('Double tap!');
+      setIsPlay(prev => !prev);
+    }else{
+      console.log('Single tap!');
+      setIsShowControls(prev => !prev)
+    }
+
+    lastTapTimeRef.current = now;
+  };
+  
+
+
+  /**
+   * @description Handles video load event and sets the duration.
+   * Sets the video current time to the playback time.
+   *
+   * @param {object} meta - video metadata
+   * @param {number} meta.duration - video duration in seconds
+   * @returns {void}
+   */
   const handleLoad = meta => {
     setDuration(meta.duration);
     if (videoRef.current) {
@@ -190,7 +285,12 @@ const PlayTab = () => {
     }
   };
 
-  const skipvideo = value => {
+  /**
+   * @description Skip video to specific time
+   * @param {number} value - time in seconds to skip to
+   * @returns {void}
+   */
+  const skipvideo = (value) => {
     if (videoRef.current && value < 0) {
       videoRef.current.seek(0.0);
     } else if (videoRef.current) {
@@ -199,18 +299,40 @@ const PlayTab = () => {
     }
   };
 
+  /**
+   * @description Handles video progress event and updates the current playback
+   * time.
+   *
+   * @param {object} progress - video progress data
+   * @param {number} progress.currentTime - current playback time in seconds
+   * @returns {void}
+   */
+  const handleProgress = progress => {
+    setPlaybackTime(progress.currentTime);
+  };
+
+  /**
+   * @description Animated value for swipe down animation, used to move
+   * play tab down when minimized
+   * @type {Animated.Value}
+   */
   const swipeDownAnimation = slideAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [Dimensions.get('window').height,0],
   });
-
+  /**
+   * @description Animated value for swipe up animation, used to move
+   * play tab up when minimized
+   * @type {Animated.Value}
+   */
   const swipeUpAnimation = slideAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [
       0,
       -Dimensions.get('window').height,
     ],
-  })
+  });
+
 
   return (
     <Animated.View
@@ -259,7 +381,8 @@ const PlayTab = () => {
                 <Text style={styles.SEtitle}>S01 E03</Text>
               </View>
             ) : (
-              <View></View>
+              <View>
+              </View>
             )}
             {!isFullscreen && (
               <TouchableOpacity
@@ -286,12 +409,12 @@ const PlayTab = () => {
               : {height: isFullscreen ? '100%' : normalize(200)}
           }>
           <Pressable
-            onLongPress={()=>isMinimize && setIsMinimize(false) || setSwipeDownComplete(false)}
+            onLongPress={()=>isMinimize ? setIsMinimize(false) || setSwipeDownComplete(false) : setIsFullscreen(prev=>!prev)}
             
             onPress={() =>
               swipeDownComplete
                 ? setIsMinimize(false) || setSwipeDownComplete(false)
-                : (setIsShowControls(prev => !prev))
+                : handleVideoPress()
             }
             style={
               swipeDownComplete
@@ -373,15 +496,21 @@ const PlayTab = () => {
               }}>
               <Text>{SecondstoTime(playbackTime)}</Text>
               <Slider
-                style={{width: '80%', alignSelf: 'center'}}
+                style={{
+                  width: '80%',
+                  alignSelf: 'center',
+                  height: normalize(20),
+                  transform: [{ scaleY: 2 }]
+                }}
                 minimumValue={0}
                 maximumValue={duration}
                 value={playbackTime}
                 onValueChange={value => setPlaybackTime(value)}
                 onSlidingComplete={value => videoRef.current.seek(value)}
                 minimumTrackTintColor={Colors.red}
-                maximumTrackTintColor={Colors.maroon}
-                thumbTintColor={Colors.yellow}
+                maximumTrackTintColor={Colors.grey}
+                thumbTintColor={Colors.white}
+                thumbImage={Icons.videothumb}
               />
               <Text>{SecondstoTime(duration)}</Text>
             </View>
@@ -395,28 +524,25 @@ const PlayTab = () => {
                 backgroundColor: 'rgba(0,0,0,0.5)',
                 paddingVertical: normalize(10),
               }}>
-              <TouchableOpacity onPress={() => setIsPlay(prev => !prev)}>
-                <Image
-                  source={isPlay ? Icons.pauseButton : Icons.playButton}
-                  style={styles.playpause}
-                />
+              <TouchableOpacity onPress={() => setIsOptionOpen(prev => !prev)}>
+                <Image source={Icons.videosettings} style={styles.button} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => {}}>
                 <Image source={Icons.prev} style={styles.button} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => {}}>
-                <Image source={Icons.next} style={styles.button} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => skipvideo(playbackTime - skipSeconds)}>
                 <Image source={Icons.fastBackward} style={styles.button} />
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsPlay(prev => !prev)}>
+                <Image source={isPlay ? Icons.pauseButton : Icons.playButton} style={styles.playpause}/>
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => skipvideo(playbackTime + skipSeconds)}>
                 <Image source={Icons.fastForward} style={styles.button} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsOptionOpen(prev => !prev)}>
-                <Image source={Icons.gear} style={styles.button} />
+              <TouchableOpacity onPress={() => {}}>
+                <Image source={Icons.next} style={styles.button} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsFullscreen(prev => !prev)}>
                 <Image

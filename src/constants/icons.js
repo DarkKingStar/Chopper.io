@@ -14,6 +14,7 @@ export const Icons = {
     list:  require('../assest/Icons/list.png'),
     gear: require('../assest/Icons/setting.png'),
     arrowDown: require('../assest/Icons/arrow-down.png'),
+
     next: require('../assest/Icons/next.png'),
     prev: require('../assest/Icons/previous.png'),
     fastForward: require('../assest/Icons/fast-forward.png'),
@@ -22,6 +23,7 @@ export const Icons = {
     fullscreen: require('../assest/Icons/fullscreen.png'),
     threedots: require('../assest/Icons/dots.png'),
     arrowBack: require('../assest/Icons/arrowback.png'),
+    arrowFront: require('../assest/Icons/arrowfront.png'),
     download: require('../assest/Icons/download.png'),
     insurance: require('../assest/Icons/insurance.png'),
     info: require('../assest/Icons/info.png'),
@@ -29,4 +31,8 @@ export const Icons = {
     rating: require('../assest/Icons/rating.png'),
     envlope: require('../assest/Icons/mail.png'),
     logout: require('../assest/Icons/logout.png'),
+    videosettings: require('../assest/Icons/videosetting.png'),
+    videothumb: require('../assest/Icons/videothumb.png'),
+    edit: require('../assest/Icons/pencil.png'),
+    jump: require('../assest/Icons/jump.png'),
 }

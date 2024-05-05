@@ -1,50 +1,35 @@
 import {call, put, select, takeLatest} from 'redux-saga/effects';
-import {postApi} from '../ApiRequest';
+import {getApi, postApi} from '../ApiRequest';
 import showErrorAlert from '../../utils/helpers/Toast';
 import constants from '../../constants/constants';
 
 import {
   setUserToken,
-
   guestLoginSuccess,
   guestLoginFailure,
-  
   loginSuccess,
   loginFailure,
-  
   signupSuccess,
   signupFailure,
-  
   logoutSuccess,
   logoutFailure,
-
-  refreshTokenFailure,
-  refreshTokenSuccess
-
 } from '../reducer/AuthReducer';
 import routes from '../../constants/routes';
 import {deleteItem, storeData} from '../LocalStore';
+import {userInfoSuccess} from '../reducer/UserReducer';
 
 let getItem = state => state.AuthReducer;
 
 /* Guest Login */
 export function* guestLoginSaga(action) {
   try {
-    yield call(
-      storeData,
-      constants.TOKEN,
-      action.payload.token,
-    );
+    yield call(storeData, constants.TOKEN, action.payload.token);
     yield call(
       storeData,
       constants.REFRESH_TOKEN,
       action.payload.refresh_token,
     );
-    yield call(
-      storeData, 
-      constants.USER_ID,
-      action.payload.user_id,
-    );
+    yield call(storeData, constants.USER_ID, action.payload.user_id);
     yield put(
       setUserToken({
         token: action.payload.token,
@@ -52,9 +37,7 @@ export function* guestLoginSaga(action) {
         refresh_token: action.payload.refresh_token,
       }),
     );
-    yield put(
-      guestLoginSuccess({}),
-    );
+    yield put(guestLoginSuccess({}));
     showErrorAlert('Login as a Guest Successful');
   } catch (error) {
     yield put(guestLoginFailure(error));
@@ -72,22 +55,18 @@ export function* loginSaga(action) {
   try {
     let response = yield call(postApi, routes.LOGIN, action.payload, header);
     console.log('response -- ', response.data);
-    if (response.data.error == false) {
+    if (response.status === 201) {
       yield call(storeData, constants.TOKEN, response.data.access_token);
       yield call(
         storeData,
         constants.REFRESH_TOKEN,
         response.data.refresh_token,
       );
-      yield call(
-        storeData,
-        constants.USER_ID,
-        response.data.userDetails._id,
-      );
+      yield call(storeData, constants.USER_ID, response.data._id);
       yield put(
         setUserToken({
           token: response.data.access_token,
-          user_id: response.data.userDetails._id,
+          user_id: response.data._id,
           refresh_token: response.data.refresh_token,
         }),
       );
@@ -119,9 +98,23 @@ export function* signupSaga(action) {
     console.log(action.payload);
     let response = yield call(postApi, routes.SIGNUP, action.payload, header);
 
-    if (response.data.error == false) {
-      showErrorAlert(response?.data?.message);
+    if (response.status === 201) {
+      yield call(storeData, constants.TOKEN, response.data.access_token);
+      yield call(
+        storeData,
+        constants.REFRESH_TOKEN,
+        response.data.refresh_token,
+      );
+      yield call(storeData, constants.USER_ID, response.data._id);
+      yield put(
+        setUserToken({
+          token: response.data.access_token,
+          user_id: response.data._id,
+          refresh_token: response.data.refresh_token,
+        }),
+      );
       yield put(signupSuccess(response.data));
+      showErrorAlert('Login Successful');
     } else {
       yield put(signupFailure(response?.data?.message));
       console.log(response.data);
@@ -147,6 +140,7 @@ export function* logoutSaga() {
         refresh_token: null,
       }),
     );
+    yield put(userInfoSuccess({userDetails: {}}));
     yield put(logoutSuccess({}));
     showErrorAlert('Logout Successful');
   } catch (error) {
@@ -155,45 +149,6 @@ export function* logoutSaga() {
     showErrorAlert('Logout Failed');
   }
 }
-
-/* refresh token */
-export function* refreshTokenSaga() {
-  try {
-    const item = yield select(getItem);
-    let header = {
-      Accept: 'application/json',
-      contenttype: 'application/json',
-      accesstoken: item?.refresh_token,
-    }
-    let response = yield call(postApi, routes.REFRESHTOKEN, {}, header);
-    console.log('refresh token response -- ', response.data);
-    if (response?.data?.error == false) {
-      yield call(
-        storeData,
-        constants.TOKEN,
-        response.data.access_token
-      )
-      yield call(
-        storeData,
-        constants.REFRESH_TOKEN,
-        response.data.refresh_token
-      )
-      yield put(
-        refreshTokenSuccess({
-          token: response.data.access_token,
-          refresh_token: response.data.refresh_token 
-        })
-      )
-    } else {
-      yield put(refreshTokenFailure(response.data));
-      yield put(logoutSaga());
-    }
-  }catch(error){
-    yield put(refreshTokenFailure(error));
-    yield put(logoutSaga());
-  }
-}
-
 
 const watchFunction = [
   (function* () {

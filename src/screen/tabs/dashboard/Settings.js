@@ -4,6 +4,7 @@ import { Colors } from '../../../constants/colors'
 import { Icons } from '../../../constants/icons'
 import normalize from '../../../utils/helpers/normalize'
 import { FlatList } from 'react-native-gesture-handler'
+import NavigationGoBack from '../../../component/NavigationGoBack'
 
 const Options=[
     {
@@ -51,12 +52,7 @@ const Settings = ({navigation}) => {
     )
   return (
     <SafeAreaView style={{ flex: 1}}>        
-        <TouchableOpacity 
-        onPress={() => navigation.goBack()}
-        style={{flexDirection:'row',alignItems:'center', paddingVertical:normalize(15)}}>
-            <Image source={Icons.arrowBack} style={{width:normalize(15),height:normalize(15), marginHorizontal:normalize(10)}}/>
-            <Text style={{fontSize:normalize(15),color:Colors.white,fontWeight:'600'}}>Settings</Text>
-        </TouchableOpacity>
+        <NavigationGoBack navigation={navigation} pagename={"Settings"}/>
         <View style={styles.container}>
             <FlatList
                 data={Options}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { Colors } from '../constants/colors';
 import { Image, Text, View } from 'react-native';
 import Home from '../screen/tabs/dashboard/Home';
@@ -14,6 +14,7 @@ import Account from '../screen/tabs/dashboard/Account';
 import Settings from '../screen/tabs/dashboard/Settings';
 import GenreList from '../screen/tabs/dashboard/GenreList';
 import GenreContent from '../screen/tabs/dashboard/GenreContent';
+import AnimeDetails from '../screen/AnimeDetails';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -146,8 +147,8 @@ const TabStackScreen = ({initialRouteName, screenStack}) =>{
   return(
     <Stack.Navigator
       screenOptions={{headerShown: false,
-        cardStyle: { backgroundColor: Colors.black },
-        cardStyleInterpolator: fadeAnimation,
+        cardStyle: { backgroundColor: Colors.black, color: Colors.white },
+        ...TransitionPresets.ScaleFromCenterAndroid,
       }}
       initialRouteName={initialRouteName}>
       {Object.entries({
@@ -155,6 +156,8 @@ const TabStackScreen = ({initialRouteName, screenStack}) =>{
       }).map(([name, component], index) => {
         return <Stack.Screen key={index} name={name} component={component} />;
       })}
+      <Stack.Screen name={'AnimeDetails'} component={AnimeDetails} />
     </Stack.Navigator>
   )
 }
+
